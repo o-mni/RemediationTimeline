@@ -22,6 +22,15 @@
       "browser &mdash; nothing you enter is transmitted or stored anywhere.</p>" +
       "</section>" +
       "<section>" +
+      "<h3>Deadline &amp; priority extras</h3>" +
+      "<p>The date and CVSS fields above the question are both optional. Set the date this was " +
+      "evaluated and your result shows the exact calendar deadline &mdash; plus a heads-up if that " +
+      "window includes a weekend, since CISA&rsquo;s clock runs in calendar days but most teams can&rsquo;t " +
+      "remediate on a Saturday or Sunday. Add a CVSS base score and you&rsquo;ll also get an RPI (Risk " +
+      "Priority Index) &mdash; a 0&ndash;100 score blending this result&rsquo;s timeline tier (70%) with " +
+      "CVSS severity (30%), for ranking several vulnerabilities that land on the same tier.</p>" +
+      "</section>" +
+      "<section>" +
       "<h3>The four factors</h3>" +
       '<dl class="info-terms">' +
       QUESTIONS.map(function (q) {

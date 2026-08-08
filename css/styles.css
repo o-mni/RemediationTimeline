@@ -1,8 +1,8 @@
 /* ==========================================================================
    Remediation Timeline Advisor — styles
    Sections: 1. Reset & tokens  2. Layout  3. Buttons & badges  4. Tabs
-   5. Info bubble  6. Stepper  7. Question card  8. Result  9. Tree explorer
-   10. Info panel  11. Footer  12. Motion & a11y
+   5. Context bar  6. Info bubble  7. Stepper  8. Question card  9. Result
+   10. Tree explorer  11. Info panel  12. Footer  13. Motion & a11y
    ========================================================================== */
 
 /* ---- 1. Reset & design tokens ------------------------------------------ */
@@ -224,7 +224,40 @@ main {
 .tabs__btn.is-active { color: var(--navy-900); border-bottom-color: var(--red-600); }
 .tabs__btn:focus-visible { outline: 2px solid var(--blue-500); outline-offset: 2px; }
 
-/* ---- 5. Info bubble ---------------------------------------------------------- */
+/* ---- 5. Context bar ----------------------------------------------------------- */
+
+.context-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem 1.75rem;
+  align-items: flex-end;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+  box-shadow: var(--shadow-sm);
+}
+.context-field { display: flex; flex-direction: column; gap: 0.35rem; }
+.context-field label { font-size: 0.78rem; font-weight: 600; color: var(--ink-muted); }
+.context-field__optional { font-weight: 400; color: var(--ink-faint); }
+.context-field input {
+  font: inherit;
+  font-size: 0.9rem;
+  padding: 0.5rem 0.7rem;
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  color: var(--ink);
+  width: 11rem;
+}
+.context-field input:focus-visible {
+  outline: 2px solid var(--blue-500);
+  outline-offset: 1px;
+  border-color: var(--navy-700);
+}
+
+/* ---- 6. Info bubble ---------------------------------------------------------- */
 
 .info-bubble { position: relative; display: inline-block; margin-left: 0.45rem; vertical-align: middle; }
 .info-bubble__trigger {
@@ -252,6 +285,20 @@ main {
   background: var(--paper);
 }
 .info-bubble__trigger:focus-visible { outline: 2px solid var(--blue-500); outline-offset: 2px; }
+
+/* variant for triggers sitting on a colored/dark badge instead of a card */
+.info-bubble--on-dark .info-bubble__trigger {
+  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+.info-bubble--on-dark .info-bubble__trigger:hover,
+.info-bubble--on-dark .info-bubble__trigger[aria-expanded="true"] {
+  border-color: #fff;
+  background: rgba(255, 255, 255, 0.28);
+  color: #fff;
+}
+.info-bubble--on-dark .info-bubble__trigger:focus-visible { outline-color: #fff; }
 
 .info-bubble__tip {
   position: absolute;
@@ -288,7 +335,7 @@ main {
 .info-bubble__tip p { margin: 0 0 0.5rem; max-width: none; }
 .info-bubble__tip-meta { margin: 0; font-size: 0.78rem; color: rgba(255, 255, 255, 0.75); }
 
-/* ---- 6. Stepper ------------------------------------------------------------ */
+/* ---- 7. Stepper ------------------------------------------------------------ */
 
 .stepper {
   display: flex;
@@ -339,7 +386,7 @@ main {
 
 .step-dot--upcoming { opacity: 0.7; }
 
-/* ---- 7. Question card ------------------------------------------------------ */
+/* ---- 8. Question card ------------------------------------------------------ */
 
 .question-card {
   background: var(--card);
@@ -406,7 +453,7 @@ main {
 .option__label { font-weight: 700; color: var(--navy-950); font-size: 1rem; }
 .option__hint { font-size: 0.82rem; color: var(--ink-muted); }
 
-/* ---- 8. Result -------------------------------------------------------------- */
+/* ---- 9. Result -------------------------------------------------------------- */
 
 .result { animation: rt-rise 220ms ease both; }
 
@@ -441,6 +488,27 @@ main {
 .result__badge[data-outcome="60D"] { background: var(--teal-60); }
 .result__badge[data-outcome="FSU"] { background: var(--gray-fsu); }
 
+.deadline-callout {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+}
+.deadline-callout__date { margin: 0; font-size: 1rem; color: var(--navy-950); }
+.deadline-callout__weekend {
+  margin: 0.6rem 0 0;
+  padding-top: 0.6rem;
+  border-top: 1px dashed var(--border-strong);
+  font-size: 0.88rem;
+  color: var(--ink-muted);
+  line-height: 1.6;
+}
+.deadline-callout__weekend strong { color: var(--red-700); }
+@media (prefers-color-scheme: dark) {
+  .deadline-callout__weekend strong { color: #ff9fac; }
+}
+
 .result__summary { font-size: 1.05rem; color: var(--ink); margin: 0 0 1.5rem; }
 
 .forensic-box {
@@ -460,6 +528,40 @@ main {
   .forensic-box__window { color: #ff8a97; }
 }
 
+.rpi-section { margin: 0 0 2rem; }
+.rpi-section--empty {
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: 0.9rem 1.1rem;
+}
+.rpi-section__prompt { margin: 0; font-size: 0.85rem; color: var(--ink-faint); }
+
+.rpi-badge {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius-md);
+  color: #fff;
+}
+.rpi-badge__score { flex: none; width: 3.25rem; font-size: 1.8rem; font-weight: 800; text-align: center; }
+.rpi-badge__text { display: flex; flex-direction: column; gap: 0.15rem; }
+.rpi-badge__label {
+  display: flex;
+  align-items: center;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.85;
+}
+.rpi-badge__band { font-size: 1.05rem; font-weight: 700; }
+
+.rpi-section[data-rpi-band="critical"] .rpi-badge { background: var(--red-800); }
+.rpi-section[data-rpi-band="high"] .rpi-badge { background: var(--red-600); }
+.rpi-section[data-rpi-band="elevated"] .rpi-badge { background: var(--blue-14); }
+.rpi-section[data-rpi-band="moderate"] .rpi-badge { background: var(--teal-60); }
+.rpi-section[data-rpi-band="low"] .rpi-badge { background: var(--gray-fsu); }
+
 .result__recap { margin-bottom: 2rem; }
 .result__recap h3 { margin: 0 0 0.75rem; font-size: 1rem; color: var(--navy-950); }
 .recap-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--border); }
@@ -475,7 +577,7 @@ main {
 .recap-row__q { font-size: 0.85rem; color: var(--ink-muted); }
 .recap-row__a { font-weight: 700; color: var(--navy-950); }
 
-/* ---- 9. Tree explorer -------------------------------------------------------- */
+/* ---- 10. Tree explorer -------------------------------------------------------- */
 
 .tree-explorer__intro { margin-bottom: 1.25rem; }
 .tree-explorer__intro h2 { margin: 0 0 0.5rem; color: var(--navy-950); }
@@ -563,7 +665,7 @@ main {
 .tree-leaf[data-outcome="60D"] { background: var(--teal-60); }
 .tree-leaf[data-outcome="FSU"] { background: var(--gray-fsu); }
 
-/* ---- 10. Info panel ------------------------------------------------------------ */
+/* ---- 11. Info panel ------------------------------------------------------------ */
 
 body.info-panel-open { overflow: hidden; }
 
@@ -649,7 +751,7 @@ body.info-panel-open { overflow: hidden; }
   .info-panel { width: 100vw; }
 }
 
-/* ---- 11. Footer --------------------------------------------------------------- */
+/* ---- 12. Footer --------------------------------------------------------------- */
 
 .site-footer { background: var(--navy-950); color: rgba(255, 255, 255, 0.82); margin-top: 3rem; }
 .site-footer__inner {
@@ -674,7 +776,7 @@ body.info-panel-open { overflow: hidden; }
 }
 .footer-links a:hover { color: #fff; text-decoration-color: #fff; }
 
-/* ---- 12. Motion & accessibility ------------------------------------------------ */
+/* ---- 13. Motion & accessibility ------------------------------------------------ */
 
 @keyframes rt-rise {
   from { opacity: 0; transform: translateY(8px); }
