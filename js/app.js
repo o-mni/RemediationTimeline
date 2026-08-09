@@ -1,34 +1,23 @@
 /**
- * App bootstrap: wires up tab switching and initializes the wizard, tree
- * explorer, and info panel. Each view renders into its own root element and
- * knows nothing about the others.
+ * App bootstrap: initializes the wizard (the single main view) and the info
+ * panel, and wires the header logo to act as a "home" button that resets
+ * the wizard back to its first screen.
  */
 (function (global) {
   "use strict";
 
-  function switchTab(tabName) {
-    document.querySelectorAll(".tabs__btn").forEach(function (btn) {
-      var isActive = btn.getAttribute("data-tab") === tabName;
-      btn.classList.toggle("is-active", isActive);
-      btn.setAttribute("aria-selected", String(isActive));
-    });
-
-    document.getElementById("panel-wizard").hidden = tabName !== "wizard";
-    document.getElementById("panel-tree").hidden = tabName !== "tree";
-  }
-
-  function initTabs() {
-    document.getElementById("tabs").addEventListener("click", function (e) {
-      var btn = e.target.closest(".tabs__btn");
-      if (!btn) return;
-      switchTab(btn.getAttribute("data-tab"));
+  function initHomeButton() {
+    var homeBtn = document.getElementById("home-btn");
+    if (!homeBtn) return;
+    homeBtn.addEventListener("click", function () {
+      global.RTInfoPanel.close();
+      global.RTWizard.restart();
     });
   }
 
   document.addEventListener("DOMContentLoaded", function () {
-    initTabs();
     global.RTWizard.init(document.getElementById("wizard-root"));
-    global.RTTreeExplorer.init(document.getElementById("tree-root"));
     global.RTInfoPanel.init();
+    initHomeButton();
   });
 })(window);

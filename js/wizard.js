@@ -1,8 +1,12 @@
 /**
  * Step-by-step assessment wizard. Owns rendering and interaction for
- * #wizard-root; reads questions/outcomes from RTModel, date/RPI math from
+ * #wizard-root; reads questions/outcomes from RTModel, RPI math from
  * RTEnrichment, and icons from RTIcons. Has no knowledge of the tree
  * explorer or info panel views.
+ *
+ * Flow: an optional CVSS score is entered once, up front, and locked in as
+ * soon as the user continues (no way back to change it) — then the four
+ * CISA questions proceed as normal.
  */
 (function (global) {
   "use strict";
@@ -11,8 +15,9 @@
 
   var root = null;
   var state = {
+    cvss: null,
+    cvssEntered: false,
     answers: {},
-    context: { evaluatedOn: null, cvss: null },
   };
 
   function answeredCount() {
@@ -28,29 +33,39 @@
   // ---- rendering -----------------------------------------------------
 
   function render() {
-    var content = isComplete() ? resultMarkup() : questionMarkup(QUESTIONS[answeredCount()]);
-    root.innerHTML = contextBarMarkup() + content;
-
-    if (isComplete()) {
+    if (!state.cvssEntered) {
+      root.innerHTML = cvssStepMarkup();
+      var cvssInput = document.getElementById("cvss-input");
+      if (cvssInput) cvssInput.focus();
+    } else if (isComplete()) {
+      root.innerHTML = resultMarkup();
       var heading = document.getElementById("result-heading");
       if (heading) heading.focus();
     } else {
+      root.innerHTML = questionMarkup(QUESTIONS[answeredCount()]);
       var firstOption = root.querySelector(".option");
       if (firstOption) firstOption.focus();
     }
   }
 
-  function contextBarMarkup() {
-    var cvssValue = state.context.cvss === null ? "" : state.context.cvss;
+  function cvssStepMarkup() {
     return (
-      '<div class="context-bar">' +
-      '<div class="context-field">' +
-      '<label for="ctx-date">Evaluated on</label>' +
-      '<input type="date" id="ctx-date" data-context="evaluatedOn" value="' + state.context.evaluatedOn + '">' +
+      '<div class="question-card">' +
+      '<p class="question-card__eyebrow">Before you start</p>' +
+      '<h2 class="question-card__title">What&rsquo;s the CVSS base score? ' +
+      bubbleMarkup(
+        "cvss",
+        "About CVSS and RPI",
+        "<p>This is only used to compute RPI (Risk Priority Index), a bonus score that blends " +
+        "it with your result below. The CISA timeline result itself never depends on CVSS.</p>"
+      ) +
+      "</h2>" +
+      '<div class="cvss-field">' +
+      '<input type="number" id="cvss-input" min="0" max="10" step="0.1" placeholder="e.g. 8.6">' +
+      '<p class="cvss-field__hint">Optional &mdash; leave it blank to skip. It&rsquo;s locked in as soon as you continue.</p>' +
       "</div>" +
-      '<div class="context-field">' +
-      '<label for="ctx-cvss">CVSS base score <span class="context-field__optional">(optional)</span></label>' +
-      '<input type="number" id="ctx-cvss" data-context="cvss" min="0" max="10" step="0.1" placeholder="0.0–10.0" value="' + cvssValue + '">' +
+      '<div class="question-card__nav">' +
+      '<button class="btn btn--primary" data-action="cvss-continue" type="button">Continue</button>' +
       "</div>" +
       "</div>"
     );
@@ -162,9 +177,7 @@
       '<span class="result__badge-label">' + outcome.label + "</span>" +
       "</h2>" +
       "</div>" +
-      deadlineCalloutMarkup(outcome) +
       '<p class="result__summary">' + outcome.summary + "</p>" +
-      (outcome.forensic ? forensicMarkup(outcome) : "") +
       rpiSectionMarkup(outcome) +
       '<div class="result__recap">' +
       "<h3>Your answers</h3>" +
@@ -179,48 +192,14 @@
     );
   }
 
-  function deadlineCalloutMarkup(outcome) {
-    var deadline = global.RTEnrichment.computeDeadline(outcome, state.context.evaluatedOn);
-
-    if (!deadline) {
-      return (
-        '<div class="deadline-callout" id="deadline-callout">' +
-        '<p class="deadline-callout__date">No fixed deadline &mdash; remediate at your next scheduled system upgrade.</p>' +
-        "</div>"
-      );
-    }
-
-    var weekendNote = "";
-    if (deadline.weekendDaysInWindow > 0) {
-      weekendNote =
-        '<p class="deadline-callout__weekend">' +
-        "<strong>Heads up:</strong> this window includes " + deadline.weekendDaysInWindow + " weekend " +
-        (deadline.weekendDaysInWindow === 1 ? "day" : "days") +
-        ". Most teams can&rsquo;t remediate over the weekend, so you effectively have " + deadline.workingDays +
-        " working " + (deadline.workingDays === 1 ? "day" : "days") + " to act, not " + outcome.days +
-        " calendar days." +
-        (deadline.deadlineIsWeekend
-          ? " The deadline itself falls on a " + deadline.deadlineWeekdayName + ", so treat the prior business day as your real target."
-          : "") +
-        "</p>";
-    }
-
-    return (
-      '<div class="deadline-callout" id="deadline-callout">' +
-      '<p class="deadline-callout__date"><strong>Due:</strong> ' + deadline.deadlineLabel + "</p>" +
-      weekendNote +
-      "</div>"
-    );
-  }
-
   function rpiSectionMarkup(outcome) {
-    var rpi = global.RTEnrichment.computeRPI(outcome, state.context.cvss);
+    var rpi = global.RTEnrichment.computeRPI(outcome, state.cvss);
 
     if (!rpi) {
       return (
         '<div class="rpi-section rpi-section--empty" id="rpi-section">' +
-        '<p class="rpi-section__prompt">Add a CVSS base score above to also get an RPI (Risk Priority Index) ' +
-        "&mdash; a single 0&ndash;100 number for ranking several vulnerabilities that land on the same timeline tier.</p>" +
+        '<p class="rpi-section__prompt">No CVSS score was provided, so no RPI (Risk Priority Index) ' +
+        "applies to this assessment.</p>" +
         "</div>"
       );
     }
@@ -243,19 +222,6 @@
       '<span class="rpi-badge__band">' + rpi.bandLabel + "</span>" +
       "</span>" +
       "</div>" +
-      "</div>"
-    );
-  }
-
-  function forensicMarkup(outcome) {
-    return (
-      '<div class="forensic-box">' +
-      "<h3>Forensic triage checklist</h3>" +
-      "<ol>" +
-      outcome.forensicSteps.map(function (s) {
-        return '<li><span class="forensic-box__window">' + s.window + "</span>" + s.detail + "</li>";
-      }).join("") +
-      "</ol>" +
       "</div>"
     );
   }
@@ -293,25 +259,31 @@
     if (openTrigger) setTipOpen(openTrigger, false);
   }
 
-  // ---- derived output (deadline/RPI) live-update, without re-rendering
-  // the context inputs themselves, so focus never drops mid-keystroke ----
+  // ---- interaction -----------------------------------------------------
 
-  function updateDerivedOutputs() {
-    var outcome = global.RTModel.resolveOutcome(state.answers);
-    if (!outcome) return;
-    var deadlineEl = document.getElementById("deadline-callout");
-    if (deadlineEl) deadlineEl.outerHTML = deadlineCalloutMarkup(outcome);
-    var rpiEl = document.getElementById("rpi-section");
-    if (rpiEl) rpiEl.outerHTML = rpiSectionMarkup(outcome);
+  function commitCvss() {
+    var input = document.getElementById("cvss-input");
+    var raw = input ? input.value.trim() : "";
+    state.cvss = raw === "" ? null : parseFloat(raw);
+    state.cvssEntered = true;
+    render();
   }
 
-  // ---- interaction -----------------------------------------------------
+  function restart() {
+    state.answers = {};
+    state.cvss = null;
+    state.cvssEntered = false;
+    render();
+  }
 
   function handleClick(e) {
     var actionEl = e.target.closest("[data-action]");
     if (!actionEl || actionEl.disabled) return;
 
     switch (actionEl.getAttribute("data-action")) {
+      case "cvss-continue":
+        commitCvss();
+        break;
       case "answer":
         state.answers[QUESTIONS[answeredCount()].id] = actionEl.getAttribute("data-value");
         render();
@@ -331,8 +303,7 @@
         break;
       }
       case "restart":
-        state.answers = {};
-        render();
+        restart();
         break;
       case "toggle-tip":
         setTipOpen(actionEl, actionEl.getAttribute("aria-expanded") !== "true");
@@ -342,45 +313,29 @@
     }
   }
 
-  // Context bar (evaluation date / CVSS) inputs: update state and, if the
-  // result is already showing, refresh just the derived-output elements —
-  // never the whole view, or the input being typed into would lose focus.
-  function handleInput(e) {
-    var field = e.target.closest("[data-context]");
-    if (!field) return;
-
-    var key = field.getAttribute("data-context");
-    if (key === "cvss") {
-      var raw = field.value.trim();
-      state.context.cvss = raw === "" ? null : parseFloat(raw);
-    } else if (key === "evaluatedOn") {
-      state.context.evaluatedOn = field.value || global.RTEnrichment.todayISO();
-    }
-
-    if (isComplete()) updateDerivedOutputs();
-  }
-
   // Closes an open info-tip on any click outside it, wherever on the page
   // it lands (including outside the wizard root entirely).
   function handleDocumentClick(e) {
     if (!e.target.closest(".info-bubble")) closeOpenTip();
   }
 
-  // Keyboard accelerators, active only while the wizard panel is showing.
+  // Keyboard accelerators. Suppressed while the info panel is open, since
+  // that owns keyboard input (and its own focus trap) at that point.
   function handleKeydown(e) {
-    var panel = document.getElementById("panel-wizard");
-    if (!panel || panel.hidden) return;
+    var infoPanel = document.getElementById("info-panel");
+    if (infoPanel && !infoPanel.hidden) return;
 
     if (e.key === "Escape") {
       closeOpenTip();
       return;
     }
 
-    if (isComplete()) return;
+    if (!state.cvssEntered) {
+      if (e.key === "Enter" && e.target.id === "cvss-input") commitCvss();
+      return;
+    }
 
-    // Don't hijack digit/backspace keys while the user is typing in the
-    // context bar's date/CVSS fields.
-    if (e.target.closest(".context-bar")) return;
+    if (isComplete()) return;
 
     if (e.key === "Backspace") {
       var backBtn = root.querySelector('[data-action="back"]');
@@ -391,8 +346,26 @@
       return;
     }
 
+    var options = root.querySelectorAll(".option");
+    if (options.length === 0) return;
+
+    // Arrow keys move focus between the two options; Enter/Space then
+    // activates whichever is focused (native <button> behavior — no extra
+    // code needed for that part). Any arrow direction works both ways,
+    // since the two options can sit side by side or stacked depending on
+    // viewport width.
+    var isArrow = e.key === "ArrowDown" || e.key === "ArrowRight" || e.key === "ArrowUp" || e.key === "ArrowLeft";
+    if (isArrow) {
+      var list = Array.prototype.slice.call(options);
+      var forward = e.key === "ArrowDown" || e.key === "ArrowRight";
+      var currentIndex = list.indexOf(document.activeElement);
+      var nextIndex = currentIndex === -1 ? 0 : (currentIndex + (forward ? 1 : -1) + list.length) % list.length;
+      e.preventDefault();
+      list[nextIndex].focus();
+      return;
+    }
+
     if (e.key === "1" || e.key === "2") {
-      var options = root.querySelectorAll(".option");
       var target = options[Number(e.key) - 1];
       if (target) {
         e.preventDefault();
@@ -403,14 +376,11 @@
 
   function init(rootEl) {
     root = rootEl;
-    state.context.evaluatedOn = global.RTEnrichment.todayISO();
-
     root.addEventListener("click", handleClick);
-    root.addEventListener("input", handleInput);
     document.addEventListener("click", handleDocumentClick);
     document.addEventListener("keydown", handleKeydown);
     render();
   }
 
-  global.RTWizard = { init: init };
+  global.RTWizard = { init: init, restart: restart };
 })(window);

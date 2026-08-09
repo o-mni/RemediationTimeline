@@ -1,14 +1,14 @@
 /**
  * Slide-in "About this tool" panel, opened from the header info button.
  * Content is generated from RTModel so it can never drift from the wizard's
- * own per-question definitions. Owns its own open/close/focus-trap behavior;
- * knows nothing about the wizard or tree explorer.
+ * own per-question definitions. Owns its own open/close/focus-trap behavior,
+ * and mounts the tree explorer into itself (the tree only ever lives here).
+ * Knows nothing about the wizard.
  */
 (function (global) {
   "use strict";
 
   var QUESTIONS = global.RTModel.QUESTIONS;
-  var OUTCOMES = global.RTModel.OUTCOMES;
 
   var openBtn, closeBtn, panel, backdrop, body;
   var closeTimer = null;
@@ -17,18 +17,18 @@
     body.innerHTML =
       "<section>" +
       "<h3>How this works</h3>" +
-      "<p>Answer four questions, in the same order as CISA&rsquo;s remediation decision tree, " +
-      "and this tool tells you the exact deadline that applies. Everything runs locally in your " +
-      "browser &mdash; nothing you enter is transmitted or stored anywhere.</p>" +
+      "<p>Optionally enter a CVSS base score up front &mdash; it locks in once you continue, since " +
+      "it shouldn&rsquo;t change partway through an assessment. Then answer four questions, in the " +
+      "same order as CISA&rsquo;s remediation decision tree, and this tool tells you the exact " +
+      "deadline that applies. Everything runs locally in your browser &mdash; nothing you enter is " +
+      "transmitted or stored anywhere.</p>" +
       "</section>" +
       "<section>" +
-      "<h3>Deadline &amp; priority extras</h3>" +
-      "<p>The date and CVSS fields above the question are both optional. Set the date this was " +
-      "evaluated and your result shows the exact calendar deadline &mdash; plus a heads-up if that " +
-      "window includes a weekend, since CISA&rsquo;s clock runs in calendar days but most teams can&rsquo;t " +
-      "remediate on a Saturday or Sunday. Add a CVSS base score and you&rsquo;ll also get an RPI (Risk " +
-      "Priority Index) &mdash; a 0&ndash;100 score blending this result&rsquo;s timeline tier (70%) with " +
-      "CVSS severity (30%), for ranking several vulnerabilities that land on the same tier.</p>" +
+      "<h3>RPI priority score</h3>" +
+      "<p>If you provided a CVSS score, your result also shows RPI (Risk Priority Index) &mdash; a " +
+      "0&ndash;100 number blending this result&rsquo;s timeline tier (70% weight) with CVSS severity " +
+      "(30% weight). It exists for one practical case: ranking several vulnerabilities that land on " +
+      "the same timeline tier.</p>" +
       "</section>" +
       "<section>" +
       "<h3>The four factors</h3>" +
@@ -44,18 +44,8 @@
       "</dl>" +
       "</section>" +
       "<section>" +
-      "<h3>Remediation tiers</h3>" +
-      '<ul class="legend">' +
-      Object.keys(OUTCOMES).map(function (id) {
-        var outcome = OUTCOMES[id];
-        return (
-          '<li class="legend__item" data-outcome="' + id + '">' +
-          '<span class="legend__icon" aria-hidden="true">' + global.RTIcons.markup(id) + "</span>" +
-          '<span class="legend__label">' + outcome.label + "</span>" +
-          "</li>"
-        );
-      }).join("") +
-      "</ul>" +
+      "<h3>Full decision tree</h3>" +
+      '<div id="tree-root"></div>' +
       "</section>" +
       "<section>" +
       "<h3>Sources</h3>" +
@@ -71,8 +61,10 @@
   }
 
   function getFocusable() {
+    // Includes <summary> since the tree explorer's collapsible nodes live
+    // inside this panel and are natively focusable/interactive too.
     return Array.prototype.slice.call(
-      panel.querySelectorAll('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])')
+      panel.querySelectorAll('a[href], button:not([disabled]), summary, [tabindex]:not([tabindex="-1"])')
     );
   }
 
@@ -96,6 +88,7 @@
   }
 
   function close() {
+    if (panel.hidden) return; // already closed — e.g. called opportunistically from elsewhere
     panel.classList.remove("is-open");
     backdrop.classList.remove("is-open");
     document.body.classList.remove("info-panel-open");
@@ -138,11 +131,12 @@
     body = document.getElementById("info-panel-body");
 
     renderContent();
+    global.RTTreeExplorer.init(document.getElementById("tree-root"));
 
     openBtn.addEventListener("click", open);
     closeBtn.addEventListener("click", close);
     backdrop.addEventListener("click", close);
   }
 
-  global.RTInfoPanel = { init: init };
+  global.RTInfoPanel = { init: init, close: close };
 })(window);

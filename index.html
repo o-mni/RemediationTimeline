@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Remediation Timeline Advisor</title>
 <meta name="description" content="Answer four quick questions to find out how fast a vulnerability needs to be remediated, based on CISA's BOD 26-04 / SSVC risk-based remediation timeline." />
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%230f2c54' d='M12 2 3 6v6c0 5.2 3.8 9.4 9 10 5.2-.6 9-4.8 9-10V6z'/%3E%3Cpath fill='%23c8203f' d='m10.5 13.2-2-2-1.4 1.4 3.4 3.4 6-6-1.4-1.4z'/%3E%3C/svg%3E" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='12' fill='%230f2c54'/%3E%3Cpath d='M5 15A7 7 0 0 1 19 15' fill='none' stroke='%23ffffff' stroke-width='2.4' stroke-linecap='round'/%3E%3Ccircle cx='12' cy='15' r='1.6' fill='%23ffffff'/%3E%3Cline x1='12' y1='15' x2='15.5' y2='8.8' stroke='%23c8203f' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E" />
 <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
@@ -13,19 +13,20 @@
 
 <header class="site-header">
   <div class="site-header__inner">
-    <div class="brand">
+    <button id="home-btn" class="brand" type="button" aria-label="Remediation Timeline Advisor — start over">
       <span class="brand__mark" aria-hidden="true">
         <svg viewBox="0 0 24 24" width="28" height="28">
-          <path fill="currentColor" d="M12 2 3 6v6c0 5.2 3.8 9.4 9 10 5.2-.6 9-4.8 9-10V6z" opacity="0.18"/>
-          <path fill="currentColor" d="M12 2 3 6v6c0 5.2 3.8 9.4 9 10 5.2-.6 9-4.8 9-10V6zm0 2.2 7 3.1V12c0 4.2-3 7.7-7 8.4-4-.7-7-4.2-7-8.4V7.3z"/>
-          <path fill="var(--red-600)" d="m10.6 13.9-2.1-2.1-1.4 1.4 3.5 3.5 6.3-6.3-1.4-1.4z"/>
+          <circle cx="12" cy="12.5" r="11" fill="currentColor" opacity="0.15"/>
+          <path d="M5 15A7 7 0 0 1 19 15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+          <circle cx="12" cy="15" r="1.5" fill="currentColor"/>
+          <line x1="12" y1="15" x2="15.5" y2="8.8" stroke="var(--red-600)" stroke-width="2.2" stroke-linecap="round"/>
         </svg>
       </span>
-      <div class="brand__text">
-        <p class="brand__title">Remediation Timeline Advisor</p>
-        <p class="brand__subtitle">Based on CISA&rsquo;s BOD 26-04 remediation timeline (SSVC-informed)</p>
-      </div>
-    </div>
+      <span class="brand__text">
+        <span class="brand__title">Remediation Timeline Advisor</span>
+        <span class="brand__subtitle">Based on CISA&rsquo;s BOD 26-04 remediation timeline (SSVC-informed)</span>
+      </span>
+    </button>
     <div class="header-actions">
       <span class="badge badge--unofficial">Unofficial &middot; not affiliated with or endorsed by CISA</span>
       <button id="info-open-btn" class="icon-btn" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="info-panel" aria-label="About this tool">
@@ -40,22 +41,7 @@
 </header>
 
 <main id="main">
-  <nav class="tabs" id="tabs" aria-label="View">
-    <button class="tabs__btn is-active" data-tab="wizard" type="button" role="tab" aria-selected="true" aria-controls="panel-wizard" id="tab-wizard">
-      Step-by-step assessment
-    </button>
-    <button class="tabs__btn" data-tab="tree" type="button" role="tab" aria-selected="false" aria-controls="panel-tree" id="tab-tree">
-      Full decision tree
-    </button>
-  </nav>
-
-  <section class="panel" id="panel-wizard" role="tabpanel" aria-labelledby="tab-wizard">
-    <div id="wizard-root"></div>
-  </section>
-
-  <section class="panel" id="panel-tree" role="tabpanel" aria-labelledby="tab-tree" hidden>
-    <div id="tree-root"></div>
-  </section>
+  <div id="wizard-root"></div>
 </main>
 
 <footer class="site-footer">

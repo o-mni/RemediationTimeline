@@ -79,7 +79,6 @@
     var tree = global.RTModel.buildTree();
     root.innerHTML =
       '<div class="tree-explorer__intro">' +
-      "<h2>Full decision tree</h2>" +
       "<p>All 16 paths through the remediation decision tree, in the same branch order as the source " +
       "chart: " + QUESTIONS.map(function (q) { return q.shortLabel; }).join(" &rarr; ") + ". " +
       "Expand a branch to follow it through.</p>" +

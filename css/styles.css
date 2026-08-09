@@ -1,8 +1,8 @@
 /* ==========================================================================
    Remediation Timeline Advisor — styles
-   Sections: 1. Reset & tokens  2. Layout  3. Buttons & badges  4. Tabs
-   5. Context bar  6. Info bubble  7. Stepper  8. Question card  9. Result
-   10. Tree explorer  11. Info panel  12. Footer  13. Motion & a11y
+   Sections: 1. Reset & tokens  2. Layout  3. Buttons & badges  4. CVSS step
+   5. Info bubble  6. Stepper  7. Question card  8. Result  9. Tree explorer
+   10. Info panel  11. Footer  12. Motion & a11y
    ========================================================================== */
 
 /* ---- 1. Reset & design tokens ------------------------------------------ */
@@ -20,12 +20,12 @@
   --red-700: #8f1a2e;
   --red-600: #c8203f;
 
-  --blue-14: #4f6f9e;   /* 14-day tier */
-  --teal-60: #1f7a8c;   /* 60-day tier */
-  --gray-fsu: #6b7280;  /* fix-on-upgrade tier */
+  --blue-14: #3f5a80;   /* 14-day tier */
+  --teal-60: #166170;   /* 60-day tier */
+  --gray-fsu: #565c68;  /* fix-on-upgrade tier */
 
   --ink: #16202e;
-  --ink-muted: #55627a;
+  --ink-muted: #3d4a5f;
   --ink-faint: #8793a8;
 
   --paper: #f5f7fb;
@@ -124,10 +124,28 @@ a { color: var(--navy-700); }
   gap: 1rem;
   flex-wrap: wrap;
 }
-.brand { display: flex; align-items: center; gap: 0.75rem; }
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 0.25rem;
+  margin: -0.25rem;
+  border-radius: var(--radius-sm);
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+  transition: opacity var(--transition);
+}
+.brand:hover { opacity: 0.85; }
+.brand:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .brand__mark { display: inline-flex; color: #fff; flex: none; }
-.brand__title { margin: 0; font-size: 1.05rem; font-weight: 700; letter-spacing: 0.01em; }
-.brand__subtitle { margin: 0; font-size: 0.8rem; color: rgba(255, 255, 255, 0.7); max-width: 40ch; }
+.brand__text { display: flex; flex-direction: column; gap: 0.1rem; }
+.brand__title { display: block; font-size: 1.05rem; font-weight: 700; letter-spacing: 0.01em; }
+.brand__subtitle { display: block; font-size: 0.8rem; color: rgba(255, 255, 255, 0.7); max-width: 40ch; }
 .header-actions { display: flex; align-items: center; gap: 0.75rem; }
 
 main {
@@ -200,64 +218,27 @@ main {
 .btn--text[disabled] { color: var(--ink-faint); cursor: not-allowed; }
 .btn--text[disabled]:hover { color: var(--ink-faint); }
 
-/* ---- 4. Tabs --------------------------------------------------------------- */
+/* ---- 4. CVSS step -------------------------------------------------------------- */
 
-.tabs {
-  display: flex;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 2rem;
-}
-.tabs__btn {
-  appearance: none;
-  background: none;
-  border: none;
-  padding: 0.85rem 0.25rem;
-  margin-right: 1.75rem;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--ink-muted);
-  cursor: pointer;
-  border-bottom: 3px solid transparent;
-  transition: color var(--transition), border-color var(--transition);
-}
-.tabs__btn:hover { color: var(--navy-800); }
-.tabs__btn.is-active { color: var(--navy-900); border-bottom-color: var(--red-600); }
-.tabs__btn:focus-visible { outline: 2px solid var(--blue-500); outline-offset: 2px; }
-
-/* ---- 5. Context bar ----------------------------------------------------------- */
-
-.context-bar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.25rem 1.75rem;
-  align-items: flex-end;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 1rem 1.25rem;
-  margin-bottom: 1.25rem;
-  box-shadow: var(--shadow-sm);
-}
-.context-field { display: flex; flex-direction: column; gap: 0.35rem; }
-.context-field label { font-size: 0.78rem; font-weight: 600; color: var(--ink-muted); }
-.context-field__optional { font-weight: 400; color: var(--ink-faint); }
-.context-field input {
+.cvss-field { margin: 0 0 0.5rem; }
+.cvss-field input {
   font: inherit;
-  font-size: 0.9rem;
-  padding: 0.5rem 0.7rem;
+  font-size: 1.1rem;
+  padding: 0.65rem 0.9rem;
   border: 1.5px solid var(--border-strong);
   border-radius: var(--radius-sm);
   background: var(--paper);
   color: var(--ink);
-  width: 11rem;
+  width: 10rem;
 }
-.context-field input:focus-visible {
+.cvss-field input:focus-visible {
   outline: 2px solid var(--blue-500);
   outline-offset: 1px;
   border-color: var(--navy-700);
 }
+.cvss-field__hint { margin: 0.6rem 0 0; font-size: 0.85rem; color: var(--ink-muted); }
 
-/* ---- 6. Info bubble ---------------------------------------------------------- */
+/* ---- 5. Info bubble ---------------------------------------------------------- */
 
 .info-bubble { position: relative; display: inline-block; margin-left: 0.45rem; vertical-align: middle; }
 .info-bubble__trigger {
@@ -269,7 +250,7 @@ main {
   border-radius: 50%;
   border: 1.5px solid var(--border-strong);
   background: var(--card);
-  color: var(--ink-faint);
+  color: var(--ink-muted);
   cursor: pointer;
   font-size: 0.72rem;
   font-weight: 700;
@@ -335,7 +316,7 @@ main {
 .info-bubble__tip p { margin: 0 0 0.5rem; max-width: none; }
 .info-bubble__tip-meta { margin: 0; font-size: 0.78rem; color: rgba(255, 255, 255, 0.75); }
 
-/* ---- 7. Stepper ------------------------------------------------------------ */
+/* ---- 6. Stepper ------------------------------------------------------------ */
 
 .stepper {
   display: flex;
@@ -365,11 +346,11 @@ main {
   border-radius: 50%;
   background: var(--card);
   border: 2px solid var(--border-strong);
-  color: var(--ink-faint);
+  color: var(--ink-muted);
   font-size: 0.8rem;
   font-weight: 700;
 }
-.step-dot__label { font-size: 0.7rem; font-weight: 600; color: var(--ink-faint); white-space: nowrap; }
+.step-dot__label { font-size: 0.7rem; font-weight: 600; color: var(--ink-muted); white-space: nowrap; }
 
 .step-dot--current .step-dot__num {
   border-color: var(--red-600);
@@ -384,9 +365,7 @@ main {
 .step-dot--done:hover .step-dot__num { background: var(--red-600); border-color: var(--red-600); }
 .step-dot--done:focus-visible { outline: 2px solid var(--blue-500); outline-offset: 4px; border-radius: 8px; }
 
-.step-dot--upcoming { opacity: 0.7; }
-
-/* ---- 8. Question card ------------------------------------------------------ */
+/* ---- 7. Question card ------------------------------------------------------ */
 
 .question-card {
   background: var(--card);
@@ -442,7 +421,7 @@ main {
   border-radius: 6px;
   background: var(--card);
   border: 1px solid var(--border-strong);
-  color: var(--ink-faint);
+  color: var(--ink-muted);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -453,7 +432,7 @@ main {
 .option__label { font-weight: 700; color: var(--navy-950); font-size: 1rem; }
 .option__hint { font-size: 0.82rem; color: var(--ink-muted); }
 
-/* ---- 9. Result -------------------------------------------------------------- */
+/* ---- 8. Result -------------------------------------------------------------- */
 
 .result { animation: rt-rise 220ms ease both; }
 
@@ -488,45 +467,7 @@ main {
 .result__badge[data-outcome="60D"] { background: var(--teal-60); }
 .result__badge[data-outcome="FSU"] { background: var(--gray-fsu); }
 
-.deadline-callout {
-  background: var(--paper);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 1rem 1.25rem;
-  margin-bottom: 1.5rem;
-}
-.deadline-callout__date { margin: 0; font-size: 1rem; color: var(--navy-950); }
-.deadline-callout__weekend {
-  margin: 0.6rem 0 0;
-  padding-top: 0.6rem;
-  border-top: 1px dashed var(--border-strong);
-  font-size: 0.88rem;
-  color: var(--ink-muted);
-  line-height: 1.6;
-}
-.deadline-callout__weekend strong { color: var(--red-700); }
-@media (prefers-color-scheme: dark) {
-  .deadline-callout__weekend strong { color: #ff9fac; }
-}
-
 .result__summary { font-size: 1.05rem; color: var(--ink); margin: 0 0 1.5rem; }
-
-.forensic-box {
-  background: #fdf2f2;
-  border: 1px solid #f3c8ce;
-  border-radius: var(--radius-md);
-  padding: 1.25rem 1.5rem;
-  margin-bottom: 1.75rem;
-}
-.forensic-box h3 { margin: 0 0 0.75rem; color: var(--red-800); font-size: 1rem; }
-.forensic-box ol { margin: 0; padding-left: 1.25rem; display: flex; flex-direction: column; gap: 0.6rem; }
-.forensic-box li { color: var(--ink); }
-.forensic-box__window { display: inline-block; font-weight: 700; color: var(--red-700); margin-right: 0.4rem; }
-@media (prefers-color-scheme: dark) {
-  .forensic-box { background: rgba(143, 26, 46, 0.16); border-color: rgba(200, 32, 63, 0.4); }
-  .forensic-box h3 { color: #ff9fac; }
-  .forensic-box__window { color: #ff8a97; }
-}
 
 .rpi-section { margin: 0 0 2rem; }
 .rpi-section--empty {
@@ -534,7 +475,7 @@ main {
   border-radius: var(--radius-md);
   padding: 0.9rem 1.1rem;
 }
-.rpi-section__prompt { margin: 0; font-size: 0.85rem; color: var(--ink-faint); }
+.rpi-section__prompt { margin: 0; font-size: 0.85rem; color: var(--ink-muted); }
 
 .rpi-badge {
   display: flex;
@@ -577,10 +518,9 @@ main {
 .recap-row__q { font-size: 0.85rem; color: var(--ink-muted); }
 .recap-row__a { font-weight: 700; color: var(--navy-950); }
 
-/* ---- 10. Tree explorer -------------------------------------------------------- */
+/* ---- 9. Tree explorer -------------------------------------------------------- */
 
 .tree-explorer__intro { margin-bottom: 1.25rem; }
-.tree-explorer__intro h2 { margin: 0 0 0.5rem; color: var(--navy-950); }
 .tree-explorer__intro p { margin: 0; color: var(--ink-muted); }
 .tree-explorer__controls { display: flex; gap: 1.25rem; margin: 0.75rem 0 0.25rem; }
 
@@ -598,7 +538,7 @@ main {
 .legend__icon { width: 1.1rem; height: 1.1rem; display: inline-flex; }
 .legend__icon svg { width: 100%; height: 100%; }
 .legend__label { font-weight: 700; color: var(--navy-950); }
-.legend__count { color: var(--ink-faint); }
+.legend__count { color: var(--ink-muted); }
 .legend__item[data-outcome="3DF"] .legend__icon { color: var(--red-800); }
 .legend__item[data-outcome="3D"] .legend__icon { color: var(--red-600); }
 .legend__item[data-outcome="14D"] .legend__icon { color: var(--blue-14); }
@@ -606,19 +546,20 @@ main {
 .legend__item[data-outcome="FSU"] .legend__icon { color: var(--gray-fsu); }
 
 #tree-root > .tree-branch { padding-left: 0; border-left: none; }
-.tree-branch { list-style: none; margin: 0; padding-left: 1.25rem; border-left: 2px solid var(--border); }
+.tree-branch { list-style: none; margin: 0; padding-left: 0.85rem; border-left: 2px solid var(--border); }
 .tree-node { margin: 0.5rem 0; }
 .tree-node summary {
   cursor: pointer;
   list-style: none;
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  padding: 0.65rem 0.9rem;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.6rem;
+  padding: 0.6rem 0.8rem;
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
 }
 .tree-node summary::-webkit-details-marker { display: none; }
 .tree-node summary:focus-visible { outline: 2px solid var(--blue-500); outline-offset: 2px; }
@@ -640,7 +581,8 @@ main {
 .tree-leaf {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.6rem;
   margin: 0.5rem 0 0.5rem 0.4rem;
   padding: 0.6rem 0.9rem;
   border-radius: var(--radius-sm);
@@ -648,6 +590,7 @@ main {
   font-size: 0.88rem;
   color: #fff;
   width: fit-content;
+  max-width: 100%;
 }
 .tree-leaf__icon svg { width: 1rem; height: 1rem; }
 .tree-leaf__flag {
@@ -665,7 +608,7 @@ main {
 .tree-leaf[data-outcome="60D"] { background: var(--teal-60); }
 .tree-leaf[data-outcome="FSU"] { background: var(--gray-fsu); }
 
-/* ---- 11. Info panel ------------------------------------------------------------ */
+/* ---- 10. Info panel ------------------------------------------------------------ */
 
 body.info-panel-open { overflow: hidden; }
 
@@ -734,7 +677,7 @@ body.info-panel-open { overflow: hidden; }
   color: var(--ink-muted);
   line-height: 1.55;
 }
-.info-terms dd .meta { display: block; margin-top: 0.35rem; font-size: 0.8rem; color: var(--ink-faint); }
+.info-terms dd .meta { display: block; margin-top: 0.35rem; font-size: 0.8rem; color: var(--ink-muted); }
 
 .info-sources { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
 .info-sources a { color: var(--navy-700); font-size: 0.88rem; text-decoration: underline; text-underline-offset: 3px; }
@@ -742,7 +685,7 @@ body.info-panel-open { overflow: hidden; }
 
 .info-panel__body .info-panel__disclaimer {
   font-size: 0.82rem;
-  color: var(--ink-faint);
+  color: var(--ink-muted);
   border-top: 1px solid var(--border);
   padding-top: 1.25rem;
 }
@@ -751,7 +694,7 @@ body.info-panel-open { overflow: hidden; }
   .info-panel { width: 100vw; }
 }
 
-/* ---- 12. Footer --------------------------------------------------------------- */
+/* ---- 11. Footer --------------------------------------------------------------- */
 
 .site-footer { background: var(--navy-950); color: rgba(255, 255, 255, 0.82); margin-top: 3rem; }
 .site-footer__inner {
@@ -776,7 +719,7 @@ body.info-panel-open { overflow: hidden; }
 }
 .footer-links a:hover { color: #fff; text-decoration-color: #fff; }
 
-/* ---- 13. Motion & accessibility ------------------------------------------------ */
+/* ---- 12. Motion & accessibility ------------------------------------------------ */
 
 @keyframes rt-rise {
   from { opacity: 0; transform: translateY(8px); }

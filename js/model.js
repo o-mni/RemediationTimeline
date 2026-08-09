@@ -117,11 +117,6 @@
       forensic: true,
       summary:
         "The most urgent tier: remediate or mitigate within 3 days AND perform a forensic triage of the asset to check for compromise.",
-      forensicSteps: [
-        { window: "Within 2 hours", detail: "Scope the exposure — identify every affected, reachable asset." },
-        { window: "Within 24 hours", detail: "Collect volatile evidence before the asset is patched or rebooted." },
-        { window: "Within 72 hours", detail: "Complete analysis and record a determination: no evidence of compromise, suspected compromise, or confirmed compromise." },
-      ],
     },
     "3D": {
       id: "3D",
